@@ -2,8 +2,13 @@
 require_once __DIR__ . '/functions.php';
 $currentUser = getCurrentUser();
 $cartCount = $currentUser ? getCartCount($currentUser['id']) : 0;
+<<<<<<< ours
 // Cache busting: pake filemtime, auto update saat CSS diubah
 $cssVersion = @filemtime(__DIR__ . '/../assets/css/style.css') ?: '4.2';
+=======
+// Cache busting: ubah angka ini setiap update CSS
+$cssVersion = '3.4';
+>>>>>>> theirs
 ?>
 <!DOCTYPE html>
 <html lang="id">

@@ -29,6 +29,11 @@
    MOBILE (max 768px) - PALING PENTING
    ==================================== */
 @media (max-width: 768px) {
+    html, body {
+        overflow-x: hidden;
+    }
+
+
     
     /* ===== NAVBAR MOBILE ===== */
     
@@ -176,6 +181,8 @@
     
     /* ===== PRODUK PAGE MOBILE ===== */
     .produk-page {
+        width: 100%;
+        max-width: 100%;
         margin: 12px auto;
         padding: 0 !important;
     }
@@ -198,9 +205,12 @@
     .produk-layout {
         grid-template-columns: 1fr !important;
         gap: 12px !important;
+        min-width: 0 !important;
     }
     
     .produk-filter {
+        width: calc(100% - 24px);
+        max-width: calc(100% - 24px);
         padding: 12px !important;
         position: static !important;
         margin: 0 12px;
@@ -209,6 +219,7 @@
     
     .produk-content {
         margin: 0 !important;
+        min-width: 0 !important;
     }
     
     .filter-section {

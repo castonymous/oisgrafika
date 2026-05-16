@@ -565,11 +565,39 @@ require_once __DIR__ . '/../includes/header.php';
                                     
                                     <div style="overflow-x: auto; margin-top: 10px;">
                                         <table class="combo-table">
+<<<<<<< ours
                                             <thead id="comboTableHead">
                                                 <!-- Headers auto-generated -->
                                             </thead>
                                             <tbody id="combinationBody">
                                                 <!-- Rows auto-generated -->
+=======
+                                            <thead>
+                                                <tr>
+                                                    <th>Kombinasi</th>
+                                                    <th>Gambar</th>
+                                                    <th>Harga</th>
+                                                    <th>Stok</th>
+                                                    <th>SKU</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="combinationBody">
+                                                <?php foreach ($variationItems as $vi): ?>
+                                                    <tr>
+                                                        <td><?= clean($vi['combination']) ?><input type="hidden" name="vi_combination[]" value="<?= clean($vi['combination']) ?>"></td>
+                                                        <td>
+                                                            <?php if (!empty($vi['image'])): ?>
+                                                                <img src="<?= SITE_URL ?>/<?= clean($vi['image']) ?>" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:6px;margin-bottom:6px;">
+                                                            <?php endif; ?>
+                                                            <input type="hidden" name="vi_image_existing[]" value="<?= clean($vi['image'] ?? '') ?>">
+                                                            <input type="file" name="vi_image[]" class="form-input form-input-sm" accept="image/jpeg,image/png,image/webp">
+                                                        </td>
+                                                        <td><input type="number" name="vi_price[]" class="form-input form-input-sm" min="0" value="<?= $vi['price'] ?>"></td>
+                                                        <td><input type="number" name="vi_stock[]" class="form-input form-input-sm" min="0" value="<?= $vi['stock'] ?>"></td>
+                                                        <td><input type="text" name="vi_sku[]" class="form-input form-input-sm" value="<?= clean($vi['sku']) ?>"></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+>>>>>>> theirs
                                             </tbody>
                                         </table>
                                     </div>

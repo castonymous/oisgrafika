@@ -430,6 +430,7 @@ function generateCombinations() {
                 price: tr.querySelector('input[name="vi_price[]"]')?.value || '',
                 stock: tr.querySelector('input[name="vi_stock[]"]')?.value || '',
                 sku: tr.querySelector('input[name="vi_sku[]"]')?.value || '',
+                image: tr.querySelector('input[name="vi_image_existing[]"]')?.value || '',
             };
         }
     });
@@ -450,6 +451,7 @@ function generateCombinations() {
     
     body.innerHTML = '';
     combos.forEach(combo => {
+<<<<<<< ours
         const ex = existing[combo] || { price: '', stock: '', sku: '' };
         // Format harga ke ribuan — FIX: split di titik dulu biar decimal "25000.00" ga jadi "2500000"
         let rawPrice = '';
@@ -474,6 +476,20 @@ function generateCombinations() {
             </td>
             <td><input type="number" name="vi_stock[]" class="form-input form-input-sm" min="0" value="${ex.stock}" placeholder="Stok"></td>
             <td><input type="text" name="vi_sku[]" class="form-input form-input-sm" value="${ex.sku}" placeholder="Mohon masukkan"></td>
+=======
+        const ex = existing[combo] || { price: '', stock: '', sku: '', image: '' };
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${combo.replace(/\|/g, ' / ')}<input type="hidden" name="vi_combination[]" value="${combo}"></td>
+            <td>
+                ${ex.image ? `<img src="${window.location.origin}/${ex.image}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:6px;margin-bottom:6px;">` : ''}
+                <input type="hidden" name="vi_image_existing[]" value="${ex.image}">
+                <input type="file" name="vi_image[]" class="form-input form-input-sm" accept="image/jpeg,image/png,image/webp">
+            </td>
+            <td><input type="number" name="vi_price[]" class="form-input form-input-sm" min="0" value="${ex.price}" placeholder="0"></td>
+            <td><input type="number" name="vi_stock[]" class="form-input form-input-sm" min="0" value="${ex.stock}" placeholder="0"></td>
+            <td><input type="text" name="vi_sku[]" class="form-input form-input-sm" value="${ex.sku}" placeholder="SKU"></td>
+>>>>>>> theirs
         `;
         body.appendChild(tr);
     });

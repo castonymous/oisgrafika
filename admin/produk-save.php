@@ -19,6 +19,10 @@
 require_once __DIR__ . '/../includes/admin-helpers.php';
 requireAdmin();
 
+function uploadVariationImage(array $file, int $productId) {
+    return uploadProductImage($file, $productId);
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     redirect(SITE_URL . '/admin/produk.php');
 }
@@ -436,12 +440,25 @@ try {
         
         // Save kombinasi items
         if (!empty($_POST['vi_combination'])) {
-            $viIns = $pdo->prepare("INSERT INTO product_variation_items (product_id, combination, price, stock, sku) VALUES (?, ?, ?, ?, ?)");
+            $viIns = $pdo->prepare("INSERT INTO product_variation_items (product_id, combination, price, stock, sku, image) VALUES (?, ?, ?, ?, ?, ?)");
             foreach ($_POST['vi_combination'] as $idx => $combo) {
                 $price = (float)str_replace(['.', ','], '', $_POST['vi_price'][$idx] ?? '0');
                 $stock = (int)($_POST['vi_stock'][$idx] ?? 0);
                 $sku = clean($_POST['vi_sku'][$idx] ?? '');
-                $viIns->execute([$id, clean($combo), $price, $stock, $sku]);
+                $existingImage = clean($_POST['vi_image_existing'][$idx] ?? '');
+                $imagePath = $existingImage;
+                if (!empty($_FILES['vi_image']['name'][$idx]) && ($_FILES['vi_image']['error'][$idx] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_OK) {
+                    $file = [
+                        'name' => $_FILES['vi_image']['name'][$idx],
+                        'type' => $_FILES['vi_image']['type'][$idx],
+                        'tmp_name' => $_FILES['vi_image']['tmp_name'][$idx],
+                        'error' => $_FILES['vi_image']['error'][$idx],
+                        'size' => $_FILES['vi_image']['size'][$idx],
+                    ];
+                    $uploaded = uploadVariationImage($file, $id);
+                    if ($uploaded) $imagePath = $uploaded;
+                }
+                $viIns->execute([$id, clean($combo), $price, $stock, $sku, $imagePath ?: null]);
             }
         }
         

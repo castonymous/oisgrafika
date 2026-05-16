@@ -10,8 +10,13 @@ $product = $stmt->fetch();
 
 if (!$product) redirect(SITE_URL . '/produk.php', 'Produk tidak ditemukan', 'error');
 
+<<<<<<< ours
 // Get variations (Variasi 1 & 2 — axes) + image map
 $varStmt = $pdo->prepare("SELECT * FROM product_variations WHERE product_id = ? ORDER BY sort_order ASC");
+=======
+// Get variants (schema v2: product_variation_items)
+$varStmt = $pdo->prepare("SELECT * FROM product_variation_items WHERE product_id = ? ORDER BY id ASC");
+>>>>>>> theirs
 $varStmt->execute([$product['id']]);
 $variations = $varStmt->fetchAll();
 
@@ -169,6 +174,7 @@ require_once __DIR__ . '/includes/header.php';
 
 <div class="product-detail">
     <div class="detail-gallery">
+<<<<<<< ours
         <div class="detail-main-image" id="mainImage">
             <?php if (!empty($images)): ?>
                 <img src="<?= SITE_URL ?>/<?= clean($images[0]['image']) ?>" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius);">
@@ -176,6 +182,13 @@ require_once __DIR__ . '/includes/header.php';
                 <img src="<?= SITE_URL ?>/<?= clean($product['image']) ?>" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:var(--radius);">
             <?php else: ?>
                 <?= $iconMap[$product['type']] ?? '📦' ?>
+=======
+        <div class="detail-main-image">
+            <?php if (!empty($product['image'])): ?>
+                <img id="detailMainImage" src="<?= SITE_URL ?>/<?= clean($product['image']) ?>" alt="<?= clean($product['name']) ?>" style="width:100%;height:100%;object-fit:cover;">
+            <?php else: ?>
+                <span id="detailMainIcon"><?= $iconMap[$product['type']] ?? '📦' ?></span>
+>>>>>>> theirs
             <?php endif; ?>
         </div>
         
@@ -239,6 +252,7 @@ require_once __DIR__ . '/includes/header.php';
             <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
             <input type="hidden" name="variation_item_id" id="variationItemId" value="">
             
+<<<<<<< ours
             <?php if (!empty($variationAxes)): ?>
                 <!-- Variasi axes -->
                 <?php foreach ($variationAxes as $axisIdx => $axis): ?>
@@ -266,6 +280,40 @@ require_once __DIR__ . '/includes/header.php';
                         </div>
                     </div>
                 <?php endforeach; ?>
+=======
+            <?php if (!empty($variants)): ?>
+                <div class="detail-section">
+                    <div class="detail-section-label">Pilih Varian:</div>
+                    <div class="variant-options">
+                        <?php foreach ($variants as $idx => $v): 
+                            $totalPrice = !empty($v['price']) ? (float)$v['price'] : (float)$product['base_price'];
+                        ?>
+                            <button type="button" class="variant-btn <?= $idx === 0 ? 'active' : '' ?>" 
+                                    data-variant-id="<?= $v['id'] ?>"
+                                    data-total-price="<?= rupiah($totalPrice) ?>"
+                                    data-image="<?= clean($v['image'] ?? '') ?>">
+                                <?= clean(str_replace('|', ' / ', $v['combination'])) ?>
+                            </button>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <script>
+                    // Set default variant
+                    document.querySelector('input[name="variant_id"]').value = '<?= $variants[0]['id'] ?>';
+                    document.querySelectorAll('.variant-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            document.querySelectorAll('.variant-btn').forEach(x => x.classList.remove('active'));
+                            this.classList.add('active');
+                            document.querySelector('input[name="variant_id"]').value = this.dataset.variantId;
+                            const image = this.dataset.image;
+                            const mainImage = document.getElementById('detailMainImage');
+                            if (image && mainImage) {
+                                mainImage.src = '<?= SITE_URL ?>/' + image;
+                            }
+                        });
+                    });
+                </script>
+>>>>>>> theirs
             <?php endif; ?>
 
             <div class="detail-section">

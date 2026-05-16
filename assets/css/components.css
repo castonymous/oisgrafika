@@ -903,9 +903,11 @@
     display: grid;
     grid-template-columns: 220px 1fr;
     gap: 20px;
+    min-width: 0;
 }
 
 .produk-filter {
+    min-width: 0;
     background: white;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border);
