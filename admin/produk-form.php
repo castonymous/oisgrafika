@@ -55,13 +55,24 @@ if (!empty($_SESSION['form_data'])) {
 }
 
 $categories = $pdo->query("SELECT * FROM categories ORDER BY name")->fetchAll();
+
+// Auto-seed kalo kategori kosong (defensive)
+if (empty($categories)) {
+    $pdo->prepare("INSERT INTO categories (name, slug, icon, description) VALUES 
+        ('Jasa Desain', 'jasa-desain', '🎨', 'Logo, banner, packaging, dan desain custom'),
+        ('Percetakan', 'percetakan', '🖨️', 'Cetak banner, kartu nama, brosur, sticker'),
+        ('Produk Digital', 'digital', '💾', 'Template, font, preset, mockup siap pakai'),
+        ('Merchandise', 'merchandise', '👕', 'Kaos custom, mug, sticker, totebag')
+    ")->execute();
+    $categories = $pdo->query("SELECT * FROM categories ORDER BY name")->fetchAll();
+}
 $completeness = calculateProductCompleteness($product, $images, $attributes);
 $defaultAttrs = getDefaultAttributes();
 
 require_once __DIR__ . '/../includes/header.php';
 ?>
 
-<link rel="stylesheet" href="<?= SITE_URL ?>/assets/css/seller-form.css?v=1.0">
+<link rel="stylesheet" href="<?= SITE_URL ?>/assets/css/seller-form.css?v=<?= @filemtime(__DIR__ . '/../assets/css/seller-form.css') ?: '1.0' ?>">
 
 <div class="seller-form-wrapper">
     <!-- Top breadcrumb -->
@@ -73,6 +84,22 @@ require_once __DIR__ . '/../includes/header.php';
         <strong><?= $isEdit ? 'Edit' : 'Tambah' ?> Produk</strong>
     </div>
 
+    <?php
+    // Tampilkan error dari validation
+    if (!empty($_SESSION['form_errors'])):
+        $formErrors = $_SESSION['form_errors'];
+        unset($_SESSION['form_errors']);
+    ?>
+        <div style="background:#fde8e8;border:1px solid #fca5a5;border-radius:8px;padding:14px 18px;margin-bottom:16px;color:#991b1b;">
+            <strong style="display:block;margin-bottom:6px;">❌ Produk tidak bisa disimpan:</strong>
+            <ul style="margin:0;padding-left:20px;">
+                <?php foreach ($formErrors as $err): ?>
+                    <li style="margin-bottom:2px;"><?= clean($err) ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
+    <?php endif; ?>
+    
     <form method="POST" action="<?= SITE_URL ?>/admin/produk-save.php" enctype="multipart/form-data" id="productForm">
         <input type="hidden" name="csrf_token" value="<?= csrfToken() ?>">
         <?php if ($isEdit): ?>
@@ -162,7 +189,7 @@ require_once __DIR__ . '/../includes/header.php';
                         </div>
 
                         <div class="field">
-                            <label class="field-label"><span class="req">*</span> Nama Produk</label>
+                            <label class="field-label"><span class="req">*</span> Nama Produk <small style="font-weight:400;color:#888;">(min 5 karakter untuk publish)</small></label>
                             <div class="input-with-counter">
                                 <input type="text" name="name" id="inputName" class="form-input" maxlength="255" required value="<?= clean($product['name']) ?>" placeholder="Contoh: Kaos Custom Cotton Combed 30s">
                                 <span class="counter"><span id="nameCount"><?= strlen($product['name']) ?></span>/255</span>
@@ -305,7 +332,7 @@ require_once __DIR__ . '/../includes/header.php';
                         </div>
                         
                         <div class="field">
-                            <label class="field-label"><span class="req">*</span> Deskripsi Lengkap <small>(min 50 karakter)</small></label>
+                            <label class="field-label"><span class="req">*</span> Deskripsi Lengkap <small>(min 20 karakter untuk publish)</small></label>
                             <div class="input-with-counter">
                                 <textarea name="description" id="inputDescription" class="form-textarea" rows="10" maxlength="5000" placeholder="Jelaskan detail produkmu...&#10;&#10;Tips:&#10;- Sebutkan keunggulan utama&#10;- Cara penggunaan&#10;- Kualitas material&#10;- Garansi & after sales"><?= clean($product['description']) ?></textarea>
                                 <span class="counter"><span id="descCount"><?= strlen($product['description']) ?></span>/5000</span>
@@ -320,13 +347,19 @@ require_once __DIR__ . '/../includes/header.php';
                         <h3 class="card-title">Informasi Penjualan</h3>
                         
                         <div class="field-row">
-                            <div class="field">
+                            <div class="field" id="basePriceField">
                                 <label class="field-label"><span class="req">*</span> Harga (Rp)</label>
-                                <input type="number" name="base_price" id="inputPrice" class="form-input" min="0" required value="<?= $product['base_price'] ?>" placeholder="0">
+                                <div class="rp-input" id="basePriceWrap">
+                                    <span>Rp</span>
+                                    <input type="text" id="inputPriceDisplay" class="form-input" value="<?= $product['base_price'] ? number_format((int)$product['base_price'], 0, ',', '.') : '' ?>" placeholder="0" oninput="formatThousand(this, 'inputPrice')">
+                                    <input type="hidden" name="base_price" id="inputPrice" value="<?= $product['base_price'] ?>">
+                                </div>
+                                <small id="basePriceHelp" style="display:none; font-size: 11px; color: var(--text-muted); margin-top: 4px;">⚠️ Harga otomatis dari variasi. Diatur per kombinasi varian.</small>
                             </div>
-                            <div class="field">
+                            <div class="field" id="baseStockField">
                                 <label class="field-label"><span class="req">*</span> Stok</label>
-                                <input type="number" name="stock" class="form-input" min="0" required value="<?= $product['stock'] ?>" placeholder="0">
+                                <input type="number" name="stock" id="inputStock" class="form-input" min="0" required value="<?= $product['stock'] ?>" placeholder="0">
+                                <small id="baseStockHelp" style="display:none; font-size: 11px; color: var(--text-muted); margin-top: 4px;">⚠️ Stok dihitung per varian.</small>
                             </div>
                             <div class="field">
                                 <label class="field-label">SKU</label>
@@ -345,7 +378,96 @@ require_once __DIR__ . '/../includes/header.php';
                             </div>
                         </div>
 
+                        <!-- Harga Grosir / Tier Pricing -->
+                        <?php
+                        $tierStmt = $pdo->prepare("SELECT * FROM product_tier_prices WHERE product_id = ? ORDER BY min_qty ASC");
+                        $tierStmt->execute([$id ?: 0]);
+                        $tiers = $tierStmt->fetchAll();
+                        ?>
+                        <div class="variation-section" id="tierSection" style="margin-top: 16px;">
+                            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                                <h4 style="margin: 0; font-size: 15px;">💰 Harga Grosir</h4>
+                                <label style="display: flex; align-items: center; gap: 8px; font-size: 13px;" id="tierToggleLabel">
+                                    <input type="checkbox" name="use_tier_pricing" id="enableTier" value="1" <?= !empty($product['use_tier_pricing']) ? 'checked' : '' ?> onchange="toggleTierPricing(this.checked)">
+                                    Aktifkan Harga Grosir
+                                </label>
+                            </div>
+                            <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">Beda harga berdasarkan jumlah beli. Max 5 tier.</p>
+                            
+                            <!-- Warning kalo variasi beda harga -->
+                            <div id="tierVariationWarning" style="display:none; padding: 10px 12px; background: #fff7e6; border: 1px solid #ffd591; border-radius: var(--radius); font-size: 12px; color: #92560f; margin-bottom: 12px;">
+                                ⚠️ <strong>Harga Grosir tidak tersedia</strong> karena variasi produk memiliki harga yang berbeda-beda. Harga grosir hanya bisa dipakai kalau semua varian punya harga yang sama.
+                            </div>
+                            
+                            <div id="tierContainer" style="display: <?= !empty($product['use_tier_pricing']) ? 'block' : 'none' ?>;">
+                                <!-- Tabel Tier -->
+                                <div class="tier-table-wrap">
+                                    <table class="tier-table-admin">
+                                        <thead>
+                                            <tr>
+                                                <th style="width: 15%;">No.</th>
+                                                <th>Jumlah Min.</th>
+                                                <th>Jumlah Maks.</th>
+                                                <th>Harga Satuan</th>
+                                                <th style="width: 60px;">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tierList">
+                                            <?php if (empty($tiers)): ?>
+                                                <tr class="tier-row">
+                                                    <td class="tier-label">Harga Grosir 1</td>
+                                                    <td><input type="number" name="tier_min[]" class="form-input" min="1" placeholder="Min."></td>
+                                                    <td><input type="number" name="tier_max[]" class="form-input" min="1" placeholder="Maks."></td>
+                                                    <td>
+                                                        <div class="rp-input">
+                                                            <span>Rp</span>
+                                                            <input type="text" name="tier_price[]" class="form-input tier-price-input" placeholder="Harga Satuan">
+                                                        </div>
+                                                    </td>
+                                                    <td><button type="button" class="tier-del" onclick="removeTier(this)" title="Hapus">🗑️</button></td>
+                                                </tr>
+                                            <?php else: ?>
+                                                <?php foreach ($tiers as $idx => $tier): ?>
+                                                    <tr class="tier-row">
+                                                        <td class="tier-label">Harga Grosir <?= $idx + 1 ?></td>
+                                                        <td><input type="number" name="tier_min[]" class="form-input" min="1" value="<?= $tier['min_qty'] ?>"></td>
+                                                        <td><input type="number" name="tier_max[]" class="form-input" min="1" value="<?= $tier['max_qty'] ?>" placeholder="Maks."></td>
+                                                        <td>
+                                                            <div class="rp-input">
+                                                                <span>Rp</span>
+                                                                <input type="text" name="tier_price[]" class="form-input tier-price-input" value="<?= number_format((int)$tier['price'], 0, ',', '.') ?>">
+                                                            </div>
+                                                        </td>
+                                                        <td><button type="button" class="tier-del" onclick="removeTier(this)" title="Hapus">🗑️</button></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </tbody>
+                                        <tfoot>
+                                            <tr>
+                                                <td colspan="5" style="text-align: center; padding: 0;">
+                                                    <button type="button" class="btn-add-tier" onclick="addTier()" id="addTierBtn">+ Tambah Harga Grosir</button>
+                                                </td>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+                                <p style="font-size: 11px; color: var(--text-muted); margin-top: 8px;">⚠️ Harga grosir akan disembunyikan ketika produk dalam promosi/diskon.</p>
+                            </div>
+                        </div>
+
                         <!-- Variasi Produk -->
+                        <?php
+                        // Load existing image map untuk variasi 1
+                        $existingImageMaps = [];
+                        if (!empty($variations)) {
+                            foreach ($variations as $v) {
+                                if (!empty($v['image_map'])) {
+                                    $existingImageMaps[$v['id']] = json_decode($v['image_map'], true) ?: [];
+                                }
+                            }
+                        }
+                        ?>
                         <div class="variation-section">
                             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                                 <h4 style="margin: 0; font-size: 15px;">Variasi Produk</h4>
@@ -357,46 +479,97 @@ require_once __DIR__ . '/../includes/header.php';
                             
                             <div id="variationContainer" style="display: <?= !empty($variations) ? 'block' : 'none' ?>;">
                                 <div id="variationList">
-                                    <?php foreach ($variations as $idx => $var): 
-                                        $opts = json_decode($var['options'], true) ?? [];
-                                    ?>
-                                        <div class="variation-row">
-                                            <button type="button" class="variation-del" onclick="removeVariation(this)">×</button>
-                                            <div class="field">
-                                                <label class="field-label">Nama Variasi (Contoh: Warna)</label>
-                                                <input type="text" name="variation_name[]" class="form-input var-name" value="<?= clean($var['name']) ?>" onchange="generateCombinations()">
+                                    <?php if (empty($variations)): ?>
+                                        <!-- Default: 1 variasi kosong dengan slot gambar -->
+                                        <div class="var-axis" data-axis="1">
+                                            <div class="var-axis-head">
+                                                <span class="var-axis-label">Variasi 1</span>
+                                                <button type="button" class="var-axis-del" onclick="removeAxis(this)" title="Hapus">×</button>
                                             </div>
-                                            <div class="field">
-                                                <label class="field-label">Opsi <small>(pisahkan dengan koma)</small></label>
-                                                <input type="text" name="variation_options[]" class="form-input var-options" value="<?= clean(implode(', ', $opts)) ?>" placeholder="Merah, Biru, Hijau" onchange="generateCombinations()">
+                                            <div class="var-axis-body">
+                                                <div class="field">
+                                                    <label class="field-label">Nama Variasi <small>(Contoh: Warna)</small></label>
+                                                    <input type="text" name="variation_name[]" class="form-input var-name" placeholder="Warna" onchange="updateOptions(this)">
+                                                </div>
+                                                <div class="field">
+                                                    <label class="field-label">Opsi <small>(klik + untuk tambah, atau ketik dipisah koma)</small></label>
+                                                    <div class="var-options-grid" data-axis-options>
+                                                        <!-- Options akan generate via JS -->
+                                                    </div>
+                                                    <input type="hidden" name="variation_options[]" class="var-options-hidden" value="">
+                                                    <input type="hidden" name="variation_has_images[]" class="var-has-images" value="1">
+                                                    <button type="button" class="btn-add-option" onclick="addOption(this)">+ Tambah Opsi</button>
+                                                </div>
                                             </div>
                                         </div>
-                                    <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <?php foreach ($variations as $idx => $var): 
+                                            $opts = json_decode($var['options'], true) ?? [];
+                                            $imgMap = $existingImageMaps[$var['id']] ?? [];
+                                            $hasImg = !empty($var['has_images']) || $idx === 0;
+                                        ?>
+                                            <div class="var-axis" data-axis="<?= $idx + 1 ?>">
+                                                <div class="var-axis-head">
+                                                    <span class="var-axis-label">Variasi <?= $idx + 1 ?></span>
+                                                    <button type="button" class="var-axis-del" onclick="removeAxis(this)" title="Hapus">×</button>
+                                                </div>
+                                                <div class="var-axis-body">
+                                                    <div class="field">
+                                                        <label class="field-label">Nama Variasi</label>
+                                                        <input type="text" name="variation_name[]" class="form-input var-name" value="<?= clean($var['name']) ?>" placeholder="<?= $idx === 0 ? 'Warna' : 'Ukuran' ?>" onchange="updateOptions(this)">
+                                                    </div>
+                                                    <div class="field">
+                                                        <label class="field-label">Opsi <small><?= $idx === 0 ? '(bisa upload gambar)' : '(text only)' ?></small></label>
+                                                        <div class="var-options-grid" data-axis-options>
+                                                            <?php foreach ($opts as $optIdx => $opt): 
+                                                                $imgPath = $imgMap[$opt] ?? '';
+                                                            ?>
+                                                                <div class="var-option-item">
+                                                                    <?php if ($hasImg): ?>
+                                                                        <label class="var-option-img" data-option="<?= clean($opt) ?>">
+                                                                            <input type="file" name="variation_option_image[<?= $idx ?>][<?= clean($opt) ?>]" accept="image/*" onchange="previewVarImg(this)" style="display:none;">
+                                                                            <?php if ($imgPath): ?>
+                                                                                <img src="<?= SITE_URL ?>/<?= clean($imgPath) ?>" alt="">
+                                                                            <?php else: ?>
+                                                                                <span class="var-img-placeholder">🖼️</span>
+                                                                            <?php endif; ?>
+                                                                        </label>
+                                                                    <?php endif; ?>
+                                                                    <input type="text" class="form-input var-option-text" value="<?= clean($opt) ?>" placeholder="Opsi" onchange="syncOptions(this)">
+                                                                    <button type="button" class="var-option-del" onclick="removeOption(this)" title="Hapus opsi">×</button>
+                                                                </div>
+                                                            <?php endforeach; ?>
+                                                        </div>
+                                                        <input type="hidden" name="variation_options[]" class="var-options-hidden" value="<?= clean(implode(',', $opts)) ?>">
+                                                        <input type="hidden" name="variation_has_images[]" class="var-has-images" value="<?= $hasImg ? 1 : 0 ?>">
+                                                        <button type="button" class="btn-add-option" onclick="addOption(this)">+ Tambah Opsi</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php endif; ?>
                                 </div>
-                                <button type="button" class="link-btn" onclick="addVariation()">+ Tambah Variasi</button>
+                                <button type="button" class="btn-add-axis" id="addAxisBtn" onclick="addAxis()" <?= count($variations ?? []) >= 2 ? 'style="display:none;"' : '' ?>>+ Tambah Variasi 2</button>
                                 
-                                <!-- Tabel kombinasi -->
-                                <div id="combinationTable" style="margin-top: 16px; <?= empty($variationItems) ? 'display:none;' : '' ?>">
-                                    <h4 style="font-size: 14px; margin-bottom: 8px;">Daftar Kombinasi</h4>
-                                    <div style="overflow-x: auto;">
+                                <!-- Tabel kombinasi (auto-generated) -->
+                                <div id="combinationTable" style="margin-top: 20px;">
+                                    <h4 style="font-size: 14px; margin-bottom: 10px;">Daftar Variasi</h4>
+                                    
+                                    <!-- Apply ke semua -->
+                                    <div class="apply-all-bar">
+                                        <input type="number" id="bulkPrice" class="form-input form-input-sm" placeholder="Harga" min="0">
+                                        <input type="number" id="bulkStock" class="form-input form-input-sm" placeholder="Stok" min="0">
+                                        <input type="text" id="bulkSku" class="form-input form-input-sm" placeholder="Kode Variasi">
+                                        <button type="button" class="btn-apply-all" onclick="applyToAll()">Terapkan Ke Semua</button>
+                                    </div>
+                                    
+                                    <div style="overflow-x: auto; margin-top: 10px;">
                                         <table class="combo-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Kombinasi</th>
-                                                    <th>Harga</th>
-                                                    <th>Stok</th>
-                                                    <th>SKU</th>
-                                                </tr>
+                                            <thead id="comboTableHead">
+                                                <!-- Headers auto-generated -->
                                             </thead>
                                             <tbody id="combinationBody">
-                                                <?php foreach ($variationItems as $vi): ?>
-                                                    <tr>
-                                                        <td><?= clean($vi['combination']) ?><input type="hidden" name="vi_combination[]" value="<?= clean($vi['combination']) ?>"></td>
-                                                        <td><input type="number" name="vi_price[]" class="form-input form-input-sm" min="0" value="<?= $vi['price'] ?>"></td>
-                                                        <td><input type="number" name="vi_stock[]" class="form-input form-input-sm" min="0" value="<?= $vi['stock'] ?>"></td>
-                                                        <td><input type="text" name="vi_sku[]" class="form-input form-input-sm" value="<?= clean($vi['sku']) ?>"></td>
-                                                    </tr>
-                                                <?php endforeach; ?>
+                                                <!-- Rows auto-generated -->
                                             </tbody>
                                         </table>
                                     </div>
@@ -493,7 +666,7 @@ require_once __DIR__ . '/../includes/header.php';
                 <div class="form-actions">
                     <a href="<?= SITE_URL ?>/admin/produk.php" class="btn btn-secondary">Batal</a>
                     <button type="submit" name="action_btn" class="btn btn-outline" onclick="document.getElementById('formAction').value='save_draft'">💾 Simpan Draft</button>
-                    <button type="submit" name="action_btn" class="btn btn-primary-solid" onclick="document.getElementById('formAction').value='publish'">🚀 Publish Produk</button>
+                    <button type="submit" name="action_btn" class="btn btn-primary-solid" onclick="return preparePublish()">🚀 Publish Produk</button>
                 </div>
             </div>
 
@@ -533,6 +706,10 @@ require_once __DIR__ . '/../includes/header.php';
     </form>
 </div>
 
-<script src="<?= SITE_URL ?>/assets/js/seller-form.js?v=1.0"></script>
+<script>
+// Existing variation items dari DB (untuk pre-fill harga/stok/SKU saat edit)
+window.EXISTING_VARIATION_ITEMS = <?= json_encode($variationItems) ?>;
+</script>
+<script src="<?= SITE_URL ?>/assets/js/seller-form.js?v=<?= @filemtime(__DIR__ . '/../assets/js/seller-form.js') ?: '1.0' ?>"></script>
 
 <?php require_once __DIR__ . '/../includes/footer.php'; ?>
