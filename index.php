@@ -67,19 +67,23 @@ $categories = $pdo->query("SELECT * FROM categories ORDER BY id ASC")->fetchAll(
     </div>
     <div class="product-grid">
         <?php foreach ($populerProducts as $p): ?>
-            <a href="<?= SITE_URL ?>/detail-produk.php?slug=<?= clean($p['slug']) ?>" class="product-card">
+            <a href="<?= url('produk', $p['slug']) ?>" class="product-card">
                 <div class="product-image">
                     <?php
                     $iconMap = ['jasa' => '🎨', 'digital' => '💾', 'fisik' => '📦'];
-                    echo $iconMap[$p['type']] ?? '📦';
                     ?>
+                    <?php if (!empty($p['image'])): ?>
+                        <img src="<?= SITE_URL ?>/<?= clean($p['image']) ?>" alt="<?= clean($p['name']) ?>" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
+                    <?php else: ?>
+                        <?= $iconMap[$p['type']] ?? '📦' ?>
+                    <?php endif; ?>
                     <?php if ($p['sold'] > 200): ?>
                         <span class="product-badge">Terlaris</span>
                     <?php endif; ?>
                 </div>
                 <div class="product-body">
                     <div class="product-name"><?= clean($p['name']) ?></div>
-                    <div class="product-price"><?= rupiah($p['base_price']) ?></div>
+                    <div class="product-price"><?= rupiah((int)$p['base_price']) ?></div>
                     <div class="product-meta">
                         <span class="product-rating">★ <?= number_format($p['rating'], 1) ?></span>
                         <span class="product-sold">Terjual <?= $p['sold'] ?></span>
