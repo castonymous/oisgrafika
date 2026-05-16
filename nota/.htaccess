@@ -1,0 +1,22 @@
+# OIS GRAFIKA - Basic security
+Options -Indexes
+
+# Block direct access to PHP partial files
+<FilesMatch "^(_topbar|_nota_template|config)\.php$">
+  Order Allow,Deny
+  Deny from all
+</FilesMatch>
+
+# Block .json files from being requested directly
+<FilesMatch "\.json$">
+  Order Allow,Deny
+  Deny from all
+</FilesMatch>
+
+# Default index
+DirectoryIndex index.php
+
+# Disable PHP execution in uploads if folder exists later
+<Directory "uploads">
+  php_flag engine off
+</Directory>

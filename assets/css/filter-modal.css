@@ -1,0 +1,304 @@
+/* ============================================
+   FILTER MODAL - BOTTOM SHEET STYLE
+   ============================================ */
+
+/* Filter button trigger */
+.btn-filter {
+    background: white;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s;
+}
+
+.btn-filter:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.filter-count-badge {
+    background: var(--primary);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 18px;
+    height: 18px;
+    border-radius: 9px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 5px;
+    margin-left: 2px;
+}
+
+/* Overlay */
+.filter-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 9998;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s, visibility 0.3s;
+}
+
+.filter-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Modal (bottom sheet di mobile, centered di desktop) */
+.filter-modal {
+    position: fixed;
+    bottom: -100%;
+    left: 0;
+    right: 0;
+    background: white;
+    z-index: 9999;
+    transition: bottom 0.3s ease, transform 0.3s ease;
+    max-height: 85vh;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 -8px 32px rgba(0,0,0,0.15);
+}
+
+.filter-modal.active {
+    bottom: 0;
+}
+
+/* Drag handle (mobile feel) */
+.filter-modal::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 4px;
+    background: var(--border-dark);
+    border-radius: 2px;
+}
+
+.filter-head {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px 16px 12px;
+    position: relative;
+    border-bottom: 1px solid var(--border);
+}
+
+.filter-head h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.filter-close {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-gray);
+    color: var(--text);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border: none;
+}
+
+.filter-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+}
+
+.filter-section {
+    margin-bottom: 24px;
+}
+
+.filter-section h4 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+/* Chip filters */
+.chip-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.chip-filter {
+    cursor: pointer;
+}
+
+.chip-filter input {
+    display: none;
+}
+
+.chip-filter span {
+    display: inline-block;
+    padding: 8px 16px;
+    background: var(--bg-gray);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px;
+    color: var(--text);
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.chip-filter input:checked + span {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* Price input */
+.price-input-row {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.price-input-row input {
+    text-align: center;
+    padding: 10px;
+    font-size: 13px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+}
+
+.quick-price-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.quick-price {
+    padding: 8px 12px;
+    background: var(--bg-gray);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 12px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.quick-price:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* Rating */
+.rating-grid {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.rating-chip {
+    cursor: pointer;
+}
+
+.rating-chip input {
+    display: none;
+}
+
+.rating-chip span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 14px;
+    background: var(--bg-gray);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    transition: all 0.2s;
+}
+
+.rating-chip input:checked + span {
+    background: var(--primary-light);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+/* Sticky actions */
+.filter-actions {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 10px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    background: white;
+}
+
+.btn-reset, .btn-apply {
+    padding: 12px;
+    border-radius: var(--radius);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+}
+
+.btn-reset {
+    background: white;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+.btn-apply {
+    background: var(--primary);
+    color: white;
+}
+
+.btn-apply:hover { background: var(--primary-dark); }
+
+/* Desktop: centered modal */
+@media (min-width: 769px) {
+    .filter-modal {
+        bottom: 50%;
+        left: 50%;
+        right: auto;
+        width: 480px;
+        max-width: calc(100vw - 32px);
+        transform: translate(-50%, 50%) scale(0.95);
+        opacity: 0;
+        border-radius: var(--radius-lg);
+        transition: opacity 0.3s, transform 0.3s;
+    }
+    
+    .filter-modal.active {
+        opacity: 1;
+        transform: translate(-50%, 50%) scale(1);
+    }
+    
+    .filter-modal::before {
+        display: none;
+    }
+}

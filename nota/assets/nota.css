@@ -1,0 +1,379 @@
+/* ============================================================
+   NOTA CSS — Print-ready, satuan mm
+   Mendukung dua mode: A4 landscape + A6 landscape
+   CATATAN: @page rule di-inject inline dari print.php berdasarkan
+            ukuran yang dipilih user (A4 vs A6).
+   ============================================================ */
+
+@media print {
+  html, body {
+    margin: 0; padding: 0;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .no-print { display: none !important; }
+
+  body.print-a4 .nota-wrapper { width: 285mm; min-height: 198mm; margin: 0 auto !important; }
+  body.print-a6 .nota-wrapper { width: 144mm; min-height: 101mm; margin: 0 auto !important; }
+
+  .nota-wrapper { box-shadow: none !important; }
+}
+
+body.print-a4, body.print-a6 { background: #d8d9dc; }
+
+/* ── BASE WRAPPER ── */
+.nota-wrapper {
+  font-family: 'Arial Narrow', 'Arial', sans-serif;
+  background: #fff;
+  color: #000;
+  margin: 12mm auto;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.nota-wrapper.nota-a4 {
+  width: 285mm;
+  min-height: 198mm;
+  padding: 4mm;
+  font-size: 9.5pt;
+}
+
+.nota-wrapper.nota-a6 {
+  width: 144mm;
+  min-height: 101mm;
+  padding: 2mm;
+  font-size: 6pt;
+}
+
+.nota-wrapper * { box-sizing: border-box; }
+
+/* ── GRID 2 KOLOM ── */
+.nota-grid {
+  display: grid;
+  grid-template-columns: 33% 1fr;
+  gap: 3mm;
+  min-height: 100%;
+}
+
+.nota-a6 .nota-grid { gap: 1.5mm; }
+
+/* ════════════════════════════════════════════════
+   KIRI
+   ════════════════════════════════════════════════ */
+.nota-left {
+  display: flex;
+  flex-direction: column;
+  gap: 2mm;
+}
+
+/* Brand row */
+.nota-brand {
+  display: flex;
+  align-items: center;
+  gap: 2mm;
+}
+.nota-logo {
+  width: 14mm; height: 14mm;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.nota-logo svg { width: 100%; height: 100%; }
+.nota-brand-name {
+  font-family: 'Arial Black', 'Arial', sans-serif;
+  font-size: 19pt;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+.nota-tagline {
+  font-style: italic;
+  font-size: 8pt;
+  color: #444;
+  margin-top: 0.5mm;
+}
+
+.nota-a6 .nota-brand-name { font-size: 12pt; }
+.nota-a6 .nota-tagline { font-size: 5pt; }
+.nota-a6 .nota-logo { width: 8mm; height: 8mm; }
+
+.nota-address {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 8pt;
+  line-height: 1.3;
+  padding-bottom: 1.5mm;
+  border-bottom: 0.4mm solid var(--accent);
+  margin-bottom: 0.5mm;
+}
+.nota-a6 .nota-address { font-size: 5pt; padding-bottom: 0.8mm; }
+
+/* Contact / QR box */
+.nota-contact-box {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2mm;
+  border: 0.3mm solid #1a1a1a;
+  border-radius: 1mm;
+  padding: 1.5mm;
+}
+.nota-a6 .nota-contact-box { padding: 0.8mm; gap: 1mm; }
+
+.nota-qr {
+  text-align: center;
+}
+.nota-qr img {
+  width: 22mm; height: 22mm;
+  display: block;
+}
+.nota-a6 .nota-qr img { width: 14mm; height: 14mm; }
+
+.nota-phone {
+  font-weight: 700;
+  font-size: 9pt;
+  margin-top: 0.8mm;
+  letter-spacing: 0.3px;
+  border-top: 0.3mm solid #1a1a1a;
+  padding-top: 0.5mm;
+}
+.nota-a6 .nota-phone { font-size: 5.5pt; }
+
+.nota-socials {
+  display: flex;
+  flex-direction: column;
+  gap: 1mm;
+  justify-content: center;
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 8.5pt;
+}
+.nota-a6 .nota-socials { font-size: 5.5pt; gap: 0.4mm; }
+
+.nota-socials > div {
+  display: flex;
+  align-items: center;
+  gap: 1.5mm;
+}
+.soc-ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 4mm; height: 4mm;
+  background: var(--accent);
+  color: #fff;
+  border-radius: 50%;
+  font-size: 7pt;
+  font-weight: 900;
+}
+.nota-a6 .soc-ico { width: 2.5mm; height: 2.5mm; font-size: 4pt; }
+
+/* Services box */
+.nota-services {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1mm 3mm;
+  border: 0.3mm solid #1a1a1a;
+  border-radius: 1mm;
+  padding: 1.5mm 2mm;
+}
+.nota-a6 .nota-services { padding: 0.8mm 1mm; gap: 0.3mm 1.5mm; }
+
+.nota-services ul { list-style: none; padding: 0; margin: 0; }
+.nota-services li {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 8.5pt;
+  line-height: 1.4;
+  letter-spacing: 0.2px;
+}
+.nota-a6 .nota-services li { font-size: 5pt; line-height: 1.3; }
+
+/* Warning box */
+.nota-warning {
+  margin-top: auto;
+  border: 0.3mm solid #1a1a1a;
+  border-radius: 1mm;
+  padding: 1.2mm 2mm;
+}
+.nota-warning-title {
+  font-weight: 900;
+  color: var(--accent);
+  font-size: 8.5pt;
+  margin-bottom: 0.5mm;
+}
+.nota-warning-text {
+  font-size: 7pt;
+  color: #2a2a2a;
+  line-height: 1.3;
+}
+.nota-a6 .nota-warning-title { font-size: 5.5pt; }
+.nota-a6 .nota-warning-text { font-size: 4.5pt; }
+
+/* ════════════════════════════════════════════════
+   KANAN
+   ════════════════════════════════════════════════ */
+.nota-right {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header (No / Tanggal / Yth) */
+.nota-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5mm 3mm;
+  margin-bottom: 2mm;
+}
+.nota-field {
+  display: flex;
+  align-items: center;
+  gap: 1.5mm;
+}
+.nota-field.full { grid-column: span 2; }
+
+.nota-field .lbl {
+  font-size: 10pt;
+  font-weight: 600;
+  min-width: 12mm;
+}
+.nota-field .box {
+  flex: 1;
+  border: 0.3mm solid #1a1a1a;
+  height: 6.5mm;
+  padding: 0.5mm 2mm;
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  font-size: 10pt;
+  background: #fff;
+}
+.nota-a6 .nota-field .lbl { font-size: 6pt; min-width: 7mm; }
+.nota-a6 .nota-field .box { height: 4mm; font-size: 6pt; padding: 0.2mm 1mm; }
+
+/* Table */
+.nota-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9pt;
+}
+.nota-a6 .nota-table { font-size: 5.5pt; }
+
+.nota-table th {
+  background: #ededed;
+  border: 0.3mm solid #1a1a1a;
+  padding: 1.2mm 2mm;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  font-size: 9pt;
+}
+.nota-a6 .nota-table th { padding: 0.5mm 1mm; font-size: 5.5pt; }
+
+.nota-table td {
+  border: 0.3mm solid #1a1a1a;
+  padding: 1mm 2mm;
+  height: 7mm;
+}
+.nota-a6 .nota-table td { padding: 0.4mm 1mm; height: 4mm; }
+
+.col-qty   { width: 14mm; text-align: center; }
+.col-nama  { width: auto; }
+.col-harga { width: 38mm; text-align: right; }
+.col-jumlah{ width: 38mm; text-align: right; }
+
+.nota-a6 .col-qty   { width: 7mm; }
+.nota-a6 .col-harga { width: 18mm; }
+.nota-a6 .col-jumlah{ width: 18mm; }
+
+/* Footer */
+.nota-footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.4fr;
+  gap: 3mm;
+  margin-top: 2mm;
+  align-items: end;
+}
+.nota-a6 .nota-footer { margin-top: 1mm; gap: 1.5mm; }
+
+.nota-ttd {
+  text-align: center;
+  font-size: 9pt;
+}
+.nota-ttd .lbl {
+  display: block;
+  margin-bottom: 8mm;
+  font-weight: 600;
+}
+.nota-ttd .dots {
+  letter-spacing: 1px;
+  font-size: 10pt;
+}
+.nota-a6 .nota-ttd { font-size: 5.5pt; }
+.nota-a6 .nota-ttd .lbl { margin-bottom: 4mm; }
+
+.nota-totals {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8mm;
+}
+.nota-totals .row {
+  display: grid;
+  grid-template-columns: 1fr 38mm;
+  gap: 1.5mm;
+  align-items: center;
+}
+.nota-a6 .nota-totals .row { grid-template-columns: 1fr 18mm; }
+
+.t-lbl {
+  text-align: right;
+  font-weight: 700;
+  font-size: 10pt;
+}
+.t-box {
+  border: 0.3mm solid #1a1a1a;
+  padding: 0.8mm 2mm;
+  text-align: right;
+  font-size: 10pt;
+  font-weight: 700;
+  height: 6mm;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.nota-a6 .t-lbl { font-size: 5.5pt; }
+.nota-a6 .t-box { font-size: 5.5pt; height: 3.5mm; padding: 0.3mm 1mm; }
+
+/* Payment checkboxes */
+.pay-row {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5mm;
+  margin-top: 1mm;
+  font-size: 9pt;
+  font-weight: 600;
+}
+.nota-a6 .pay-row { font-size: 5.5pt; gap: 2.5mm; }
+
+.pay-item { display: inline-flex; align-items: center; gap: 1mm; }
+.cb {
+  display: inline-block;
+  width: 3mm; height: 3mm;
+  border: 0.3mm solid #1a1a1a;
+  position: relative;
+}
+.nota-a6 .cb { width: 2mm; height: 2mm; }
+.cb.on::after {
+  content: '✓';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 3mm;
+  line-height: 1;
+  color: var(--accent);
+}
+.nota-a6 .cb.on::after { font-size: 2mm; }
+
+.mono { font-family: 'DM Mono', 'Courier New', monospace; }
